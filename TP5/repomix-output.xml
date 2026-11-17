@@ -1,0 +1,352 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+main.c
+Pile.c
+Pile.h
+TP.c
+TP.h
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="main.c">
+#include "TP.h"
+#include <stdlib.h>
+
+
+int main()
+{
+	char s[100];
+	char ss[100];
+	char c;
+	int ind = 0;
+	do
+	{
+		ind = 0;
+		printf("Donner le mot : ");
+		while ((c = getchar()) != '\n')
+			if (c != ' ')
+				s[ind++] = c;
+		s[ind] = '\0';
+		system("CLS");
+		strcpy(ss, s);
+		strcat(ss, "$");
+		analyse_syntaxique(ss) == 1 ? printf("\n%s est connu\n", s) : printf("\n");
+		system("PAUSE");
+		system("CLS");
+	} while (1);
+	return 1;
+}
+</file>
+
+<file path="Pile.c">
+#include "Pile.h"
+
+
+
+int empty(Pile* maPile)
+{
+	return (maPile == 0);
+}
+
+void empiler(Pile** maPile, char _symbole[8])
+{
+	Pile* NE = allocate(_symbole);
+	NE->svt = *maPile;
+	*maPile = NE;
+}
+
+Pile* allocate(char _symbole[8])
+{
+	Pile* NE = (Pile*)malloc(sizeof(Pile));
+	if (!NE)
+		exit(-1);
+	NE->symbole = (char*)malloc(8 * sizeof(char));
+	strcpy(NE->symbole, _symbole);
+	NE->svt = 0;
+	return NE;
+}
+
+void depiler(Pile** maPile)
+{
+	Pile* tmp;
+	if (!empty(*maPile))
+	{
+		tmp = *maPile;
+		*maPile = (*maPile)->svt;
+		free(tmp->symbole);
+		tmp->svt = 0;
+		free(tmp);
+	}
+}
+
+
+int print(Pile** pile)
+{
+	int taille = 0;
+	char _symbole[8];
+	if (*pile)
+	{
+		strcpy(_symbole, (*pile)->symbole);
+		depiler(pile);
+		taille = print(pile);
+		printf("%s", _symbole);
+	    strlen(_symbole);
+		empiler(pile, _symbole);
+
+		return taille + strlen(_symbole);
+;	}
+	return 0;
+}
+</file>
+
+<file path="Pile.h">
+#define _CRT_SECURE_NO_WARNINGS 
+#pragma once
+#include <string.h>
+#include <stdio.h>
+
+typedef struct pile
+{
+	char* symbole;
+	struct pile* svt;
+}Pile;
+
+int empty(Pile);
+void empiler(Pile**, char[8]);
+Pile* allocate(char[8]);
+void depiler(Pile**);
+int print(Pile**);
+</file>
+
+<file path="TP.c">
+#include "TP.h"
+#include <string.h>
+
+int table_analyse[7][8] = { {-1, -1, 0, -1, 0, 0, -1, -1},
+							{1, -1, -1, 2, -1, -1, 2, -1},
+							{-1, -1, 3, -1, 3, 3, -1, -1},
+							{5, -1, 4, 5, 4, 4, 5, -1},
+							{-1, -1, 6, -1, 6, 6, -1, -1},
+							{8, 7, 8, 8, 8, 8, 8, -1},
+							{-1, -1, 9, -1, 10, 11, -1, -1} };
+
+char derivation[maxDeri_i][maxDeri_j][8] = { {"S","R'", "!"},
+									   	   {"+", "S","R'"},
+										   {"epsilon", "!","!"}, 
+										   {"T", "S'","!"}, 
+										   {"T", "S'","!"}, 
+										   {"epsilon", "!","!"},
+										   {"U", "T'","!"}, 
+										   {"*", "T'","!"},
+										   {"epsilon", "!","!"},
+										   {"(", "R",")"},
+										   {"a", "!","!"},
+										   {"b", "!","!"}, };
+
+
+
+
+int check_terminal(char c[8])
+{
+	return ((c[0] == '+') || (c[0] == '*') || (c[0] == '(') || 
+		(c[0] == ')') || (c[0] == '$') || (c[0] == 'a') || (c[0] == 'b'));
+}
+
+int get_indice_mot(char c)
+{
+	switch (c)
+	{
+	case '+':
+		return 0;
+	case '*':
+		return 1;
+	case '(':
+		return 2;
+	case ')':
+		return 3;
+	case 'a':
+		return 4;
+	case 'b':
+		return 5;
+	case '$':
+		return 6;
+	default:
+		return 7;
+	}
+}
+
+int get_indice_non_terminal(char non_terminal[8])
+{
+	if (!strcmp(non_terminal, "R"))
+		return 0;
+	if (!strcmp(non_terminal, "R'"))
+		return 1;
+	if (!strcmp(non_terminal, "S"))
+		return 2;
+	if (!strcmp(non_terminal, "S'"))
+		return 3;
+	if (!strcmp(non_terminal, "T"))
+		return 4;
+	if (!strcmp(non_terminal, "T'"))
+		return 5;
+	if (!strcmp(non_terminal, "U"))
+		return 6;
+	return -1;
+}
+
+int erreur(char* mot)
+{
+	//Pour ne pas afficher $
+	int taille = strlen(mot) - 1;
+	printf("\nMot inconnu : ");
+	for (int i = 0; i < taille; i++)
+		printf("%c", mot[i]);
+	printf("\n");
+	return 0;
+}
+
+int accepter()
+{
+	return 1;
+}
+
+void print_space(int n)
+{
+	for (int i = 0; i < n; i++)
+		printf(" ");
+}
+
+int analyse_syntaxique(char* mot)
+{
+	Pile* pile = 0;
+	int ind = 0, deri, taille = strlen(mot), taille_pile;
+	char c[8];
+	empiler(&pile, "$");
+	empiler(&pile, "R");
+	printf("PILE"); print_space(26);
+	printf("Entree"); print_space(24); 
+	printf("Sortie\n\n");
+	do
+	{
+		taille_pile = print(&pile);
+		print_space(30 - taille_pile);
+		for (int i = ind; i < taille; i++)
+			printf("%c", mot[i]);
+		print_space(30 - (taille - ind));
+		strcpy(c, pile->symbole);
+		if (!check_terminal(c))
+		{
+			if ((deri = table_analyse[get_indice_non_terminal(c)][get_indice_mot(mot[ind])]) != -1)
+			{
+				printf("%s -> ", pile->symbole);
+				depiler(&pile);
+				int max = maxDeri_j - 1;
+				while ((!strcmp(derivation[deri][max], "!")) && max) max--;
+				for (int i = 0; i <= max; i++)
+				{
+					if (strcmp(derivation[deri][max], "epsilon")) // ne pas empiler epsilon
+						empiler(&pile, derivation[deri][max - i]);
+					printf("%s", derivation[deri][i]);
+				}
+			}
+			else
+			{
+				printf("ERREUR!!\n");
+				return erreur(mot);
+			}
+		}
+		else
+		{
+			if (c[0] == '$')
+			{
+				if (mot[ind] == '$')
+				{
+					printf("ACCEPTER(analyse syntaxique reussie)\n");
+					return accepter();
+				}
+				else
+				{
+					printf("ERREUR!!\n");
+					return erreur(mot);
+				}
+			}
+			else
+			{
+				if (c[0] == mot[ind])
+				{
+					depiler(&pile);
+					ind++;
+				}
+				else
+				{
+					printf("ERREUR!!\n");
+					return erreur(mot);
+				}
+			}
+		}
+		printf("\n");
+	} while (1);
+	return 1;
+}
+</file>
+
+<file path="TP.h">
+#pragma once
+#define maxDeri_j 3
+#define maxDeri_i 12
+#include "Pile.h"
+
+int table_analyse[7][8];
+char derivation[maxDeri_i][maxDeri_j][8];
+
+int analyse_syntaxique(char*);
+int check_terminal(char[8]);
+int get_indice_mot(char);
+int get_indice_non_terminal(char[8]);
+int erreur(char*);
+int accepter();
+</file>
+
+</files>
